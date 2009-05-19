@@ -6,7 +6,7 @@
 Here some examples will be shown, if you have an example that makes something interesting send it to me, I will add it here.
 
 == Draw 200 random pixels on random locations with random colors ==
-
+{{{
 # start of the program
 : start
 
@@ -27,9 +27,9 @@ add r3 1
 # if the counter is lower than 200 go to the begining
 lt r3 200 start
 # end of the program
-
+}}}
 == Draw an X with gradient colors ==
-
+{{{
 : begin
 # put a pixel of color r2 on r0, r1
 put r2
@@ -67,3 +67,4 @@ add r2 1
 lt r1 200 another
 
 # end!
+}}}
