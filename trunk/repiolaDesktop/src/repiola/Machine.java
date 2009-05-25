@@ -58,7 +58,7 @@ public class Machine {
     public static final byte I_NOP = 0;
 
     // instructions that contain register as second byte
-    public static final int[] I_SOURCE_REGISTER = {I_RANDOM, I_GET, I_ADD, I_SUB, I_MUL, I_DIV, I_MOD, I_AND, I_OR, I_XOR, I_NOT, I_SET, I_EQ, I_NE, I_GT, I_GE, I_LT, I_LE};
+    public static final int[] I_SOURCE_REGISTER = {I_RANDOM, I_GET, I_ADD, I_RADD, I_SUB, I_RSUB, I_MUL, I_RMUL, I_DIV, I_RDIV, I_MOD, I_RMOD, I_AND, I_RAND, I_OR, I_ROR, I_XOR, I_RXOR, I_NOT, I_SET, I_RSET, I_EQ, I_REQ, I_NE, I_RNE, I_GT, I_RGT, I_GE, I_RGE, I_LT, I_RLT, I_LE, I_RLE};
     // instructions that contain a pixel color xppx
     public static final int[] I_PIXEL = {I_PUT, I_RPUT};
     // instructions that contain a number xxnn

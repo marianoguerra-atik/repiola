@@ -35,4 +35,10 @@ public class SwingCanvas extends Canvas implements Drawable{
         this.repaint(x, y, 1, 1);
     }
 
+    public void clear()
+    {
+
+        getGraphics().fillRect(0, 0, this.getWidth(), this.getHeight());
+    }
+
 }
