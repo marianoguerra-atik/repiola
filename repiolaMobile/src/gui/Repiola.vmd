@@ -17,17 +17,6 @@
                     <Component componentID="4" typeID="C#MobileDeviceResumeEventSource"/>
                 </Component>
                 <Component componentID="5" typeID="C#Display"/>
-                <Component componentID="32" typeID="C#EntryPoint">
-                    <Property name="methodName" typeID="Pjava.lang.String" value="Vmethod"/>
-                    <Property name="start" typeID="C#EntryPointStartEventSource" value="R33"/>
-                    <Component componentID="33" typeID="C#EntryPointStartEventSource">
-                        <Property name="eventHandler" typeID="C#EventHandler" value="R37"/>
-                        <Component componentID="37" typeID="C#CallPointEventHandler">
-                            <Property name="eventSource" typeID="C#EventSource" value="R33"/>
-                            <Property name="callPoint" typeID="C#CallPoint" value="R36"/>
-                        </Component>
-                    </Component>
-                </Component>
                 <Component componentID="36" typeID="C#CallPoint">
                     <Property name="accessCode" typeID="P#javacode" value="Vthis.run();"/>
                 </Component>
@@ -41,7 +30,7 @@
                 <Component componentID="14" typeID="Cgui.MobileCanvas">
                     <Property name="instanceName" typeID="Pjava.lang.String" value="VmobileCanvas"/>
                     <Property name="commands" typeID="1C#CommandEventSource" value="A1:3_R23"/>
-                    <Property name="title" typeID="Pjava.lang.String" value="VmobileCanvas"/>
+                    <Property name="title" typeID="Pjava.lang.String" value="Vrepiola result"/>
                     <Property name="commandListener" typeID="C#CommandListener" value="R7"/>
                     <Component componentID="23" typeID="C#CommandEventSource">
                         <Property name="eventHandler" typeID="C#EventHandler" value="R26"/>
@@ -56,10 +45,10 @@
                 <Component componentID="16" typeID="Cjavax.microedition.lcdui.TextBox">
                     <Property name="instanceName" typeID="Pjava.lang.String" value="VtextBox"/>
                     <Property name="commands" typeID="1C#CommandEventSource" value="A2:3_R183_R20"/>
-                    <Property name="title" typeID="Pjava.lang.String" value="VtextBox"/>
+                    <Property name="title" typeID="Pjava.lang.String" value="Vcode"/>
                     <Property name="commandListener" typeID="C#CommandListener" value="R7"/>
-                    <Property name="string" typeID="Pjava.lang.String" value="V: begin&#10;&#10;rnd r0&#10;mod r0 100&#10;rnd r1&#10;mod r1 100&#10;rnd r2&#10;add r3 1&#10;put r2&#10;&#10;lt r3 200 begin&#10;&#10;"/>
-                    <Property name="maxSize" typeID="Pint" value="V100"/>
+                    <Property name="string" typeID="Pjava.lang.String" value="V: begin&#10;&#10;rnd r0&#10;mod r0 100&#10;rnd r1&#10;mod r1 100&#10;rnd r2&#10;add r3 1&#10;put r2&#10;&#10;lt r3 200 begin&#10;&#10;&#10;"/>
+                    <Property name="maxSize" typeID="Pint" value="V5000"/>
                     <Component componentID="18" typeID="C#CommandEventSource">
                         <Property name="eventHandler" typeID="C#EventHandler" value="R28"/>
                         <Property name="displayable" typeID="Cjavax.microedition.lcdui.Displayable" value="R16"/>
@@ -102,10 +91,9 @@
         </Component>
     </Document>
     <FlowScene version="1">
-        <Node componentID="2" descriptorID="componentNode2" x="50" y="50"/>
+        <Node componentID="2" descriptorID="componentNode2" x="50" y="231"/>
+        <Node componentID="16" descriptorID="componentNode16" x="302" y="54"/>
         <Node componentID="14" descriptorID="componentNode14" x="474" y="280"/>
-        <Node componentID="16" descriptorID="componentNode16" x="318" y="50"/>
-        <Node componentID="36" descriptorID="componentNode36" x="526" y="183"/>
-        <Node componentID="32" descriptorID="componentNode32" x="293" y="284"/>
+        <Node componentID="36" descriptorID="componentNode36" x="512" y="141"/>
     </FlowScene>
 </VisualDesign>

@@ -24,6 +24,10 @@ public class MobileCanvas extends Canvas implements Drawable{
         machine = new Machine(this);
     }
 
+    public void newImage(int width, int height) {
+        image = Image.createImage(width, height);
+    }
+
 
     protected void paint(Graphics g) {
         if(changed)
@@ -42,7 +46,7 @@ public class MobileCanvas extends Canvas implements Drawable{
         changed = true;
         Graphics graphics = image.getGraphics();
         graphics.setColor(color);
-        graphics.drawLine(x, y, x + 1, y);
+        graphics.drawLine(x, y, x, y);
     }
 
     public String getProgram() {
@@ -51,7 +55,6 @@ public class MobileCanvas extends Canvas implements Drawable{
 
     public void setProgram(String program) {
         this.program = program;
-
         interpreter = new Interpreter(program, machine);
         String line = null;
 
@@ -101,6 +104,4 @@ public class MobileCanvas extends Canvas implements Drawable{
             }
         }
     }
-
-
 }
