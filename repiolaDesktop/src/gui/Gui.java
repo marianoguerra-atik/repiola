@@ -58,7 +58,7 @@ public class Gui extends javax.swing.JFrame {
 
         code.setColumns(20);
         code.setRows(5);
-        code.setText(": begin\n\nput r2\nadd r0 1\nadd r1 1\nadd r2 1\n\nlt r0 200 begin\n\n# right to left line\n\nset r0 199\nset r1 0\nset r2 0\n\n: another\n\nput r2\nsub r0 1\nadd r1 1\nadd r2 1\n\nlt r1 200 another\n\n# some random pixels\n\nset r3 0\n\n: random\n\nrnd r0\nmod r0 200\nrnd r1\nmod r1 200\nrnd r2\nadd r3 1\nput r2\n\nlt r3 200 random\n\n# end!");
+        code.setText("set r0 100\nset r1 100\n: begin\neq r0 0 end\neq r1 0 end\neq r0 198 end\neq r1 198 end\nadd r3 2\nset r6 r3\nadd r4 1\nlt r4 4 next\nset r4 0\n: next\n: draw\nput r2\nadd r2 10\nsub r6 1\nne r4 0 check-1\nsub r1 1\njmp done\n: check-1\nne r4 1 check-2\nsub r0 1\njmp done\n: check-2\nne r4 2 check-3\nadd r1 1\njmp done\n: check-3\nadd r0 1\n: done\neq r6 0 begin\njmp draw\n: end\n");
         scrollText.setViewportView(code);
 
         run.setText("run");
@@ -105,47 +105,51 @@ public class Gui extends javax.swing.JFrame {
     }//GEN-LAST:event_formFocusGained
 
     private void runActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_runActionPerformed
-        Interpreter interpreter = new Interpreter(code.getText(), machine);
+        Interpreter interpreter;
         String line = null;
+        int opcode;
         clearOutput();
+        swingCanvas.clear();
 
         try
         {
+            interpreter = new Interpreter(code.getText(), machine);
             line = interpreter.step();
         }
         catch(Exception ex)
         {
-            System.err.println("\nError line: " + line + "\n\t" + ex.getMessage());
+            appendOutput("\nError0 line: " + line + "\n\t" + ex.getMessage());
             return;
         }
 
         machine.clear();
-        int code;
 
         while(line != null)
         {
+            opcode = interpreter.getCurrentOpcode();
+            
             try
             {
-                code = interpreter.parseLine(line);
+                if(opcode == -1) {
+                    opcode = interpreter.parseLine(line);
+                    interpreter.setCurrentOpcode(opcode);
+                }
             }
             catch(Exception ex)
             {
-                appendOutput("\nError line: " + line + "\n\t" + ex.getMessage());
+                appendOutput("\nError1 line: " + line + "\n\t" + ex.getMessage());
                 break;
             }
-
-            appendOutput("\nLine: " + line + "\nCode: " + code);
 
             try
             {
-                machine.execute(code);
+                machine.execute(opcode);
             }
             catch(Exception ex)
             {
-                System.err.println("\nError executing code: " + line + "\n\t" + ex.getMessage());
+                appendOutput("\nError executing code: " + line + "\n\t" + ex.getMessage());
                 break;
             }
-            appendOutput("\n" + machine.toString());
             
             try
             {
@@ -153,11 +157,9 @@ public class Gui extends javax.swing.JFrame {
             }
             catch(Exception ex)
             {
-                appendOutput("\nError line: " + line + "\n\t" + ex.getMessage());
+                appendOutput("\nError2 line: " + line + "\n\t" + ex.getMessage());
                 break;
             }
-
-            appendOutput("\n-----------------------------------------\n");
         }
 }//GEN-LAST:event_runActionPerformed
 
