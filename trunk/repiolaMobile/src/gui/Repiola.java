@@ -99,7 +99,7 @@ public class Repiola extends MIDlet implements CommandListener {
         if (mobileCanvas == null) {//GEN-END:|14-getter|0|14-preInit
             // write pre-init user code here
             mobileCanvas = new MobileCanvas();//GEN-BEGIN:|14-getter|1|14-postInit
-            mobileCanvas.setTitle("mobileCanvas");
+            mobileCanvas.setTitle("repiola result");
             mobileCanvas.addCommand(getBackCommand1());
             mobileCanvas.setCommandListener(this);//GEN-END:|14-getter|1|14-postInit
             // write post-init user code here
@@ -145,7 +145,7 @@ public class Repiola extends MIDlet implements CommandListener {
     public TextBox getTextBox() {
         if (textBox == null) {//GEN-END:|16-getter|0|16-preInit
             // write pre-init user code here
-            textBox = new TextBox("textBox", ": begin\n\nrnd r0\nmod r0 100\nrnd r1\nmod r1 100\nrnd r2\nadd r3 1\nput r2\n\nlt r3 200 begin\n\n", 100, TextField.ANY);//GEN-BEGIN:|16-getter|1|16-postInit
+            textBox = new TextBox("code", ": begin\n\nrnd r0\nmod r0 100\nrnd r1\nmod r1 100\nrnd r2\nadd r3 1\nput r2\n\nlt r3 200 begin\n\n\n", 5000, TextField.ANY);//GEN-BEGIN:|16-getter|1|16-postInit
             textBox.addCommand(getBackCommand());
             textBox.addCommand(getOkCommand());
             textBox.setCommandListener(this);//GEN-END:|16-getter|1|16-postInit
@@ -200,16 +200,7 @@ public class Repiola extends MIDlet implements CommandListener {
     }
     //</editor-fold>//GEN-END:|22-getter|2|
 
-    //<editor-fold defaultstate="collapsed" desc=" Generated Method: method ">//GEN-BEGIN:|32-entry|0|33-preAction
-    /**
-     * Performs an action assigned to the method entry-point.
-     */
-    public void method() {//GEN-END:|32-entry|0|33-preAction
-        // write pre-action user code here
-        this.run();//GEN-LINE:|32-entry|1|33-postAction
-        // write post-action user code here
-    }//GEN-BEGIN:|32-entry|2|
-    //</editor-fold>//GEN-END:|32-entry|2|
+
 
     /**
      * Returns a display instance.
@@ -245,8 +236,10 @@ public class Repiola extends MIDlet implements CommandListener {
     public void run()
     {
         Storage.save("code", textBox.getString(), 1);
-        getDisplay().setCurrent(mobileCanvas);
-        getMobileCanvas().setProgram(textBox.getString());
+        getMobileCanvas().newImage(getDisplay().getCurrent().getWidth(), getDisplay().getCurrent().getWidth());
+        getDisplay().setCurrent(getMobileCanvas());
+        getMobileCanvas().repaint();
+        getDisplay().callSerially(new Thread(){public void run(){getMobileCanvas().setProgram(textBox.getString());getMobileCanvas().repaint();}});
     }
     /**
      * Called when MIDlet is paused.

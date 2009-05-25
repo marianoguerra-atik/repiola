@@ -12,7 +12,11 @@ import java.util.Vector;
  */
 public class Interpreter {
     private String[] lines;
+    // line: label
     private Hashtable labels;
+    // line where a jump names a label: label
+    private Hashtable jumpLabels;
+    private Hashtable opcodes;
     private int currentLine;
     private Machine machine;
     private boolean inJump;
@@ -25,29 +29,62 @@ public class Interpreter {
     private static final String[] registerCommands =  {"add", "sub", "mul", "div", "mod", "set", "or", "and", "xor"};
     private static final String[] compareCommands =  {"eq", "ne", "gt", "lt", "ge", "le"};
 
-    public Interpreter(String program, Machine machine) {
+    public Interpreter(String program, Machine machine){
         lines = split(program, "\n");
         labels = new Hashtable();
+        jumpLabels = new Hashtable();
+        opcodes = new Hashtable();
+        parseLabels();
         this.machine = machine;
+    }
+
+    private void parseLabels()
+    {
+        String label, line;
+        for(int i = 0; i < lines.length; i++)
+        {
+            line = lines[i];
+
+            if(line.startsWith(":"))
+            {
+                label = line.substring(2);
+                labels.put(label, new Label(label, i + 1));
+            }
+        }
     }
 
     public String step() throws Exception
     {
-        if(inJump && machine.isJump())
+        String line;
+        if(inJump)
         {
-            jumpToLabel(lastLabel);
-            machine.setInJump(false);
-            machine.setJump(false);
-            inJump = false;
-            return lines[currentLine];
+            if(machine.isJump())
+            {
+                jumpToLabel(lastLabel);
+                machine.setInJump(false);
+                machine.setJump(false);
+                inJump = false;
+                line = lines[currentLine];
+                currentLine++;
+                return line;
+            }
+            else {
+                machine.setInJump(false);
+                machine.setJump(false);
+                inJump = false;
+                line = lines[currentLine];
+                currentLine++;
+                return line;
+            }
         }
 
         if(currentLine < lines.length)
         {
+            line = lines[currentLine];
             currentLine++;
-            return lines[currentLine - 1];
+            return line;
         }
-        
+
         return null;
     }
 
@@ -55,15 +92,15 @@ public class Interpreter {
     {
         String []tokens = split(line.trim(), " ");
         int nop = (int)Machine.I_NOP << 24;
-        
+
         if(tokens.length == 0)
         {
             return nop;
         }
-        
+
         String command = tokens[0];
-        
-        if(command.equals("#") || command.equals(".") || command.equals(""))
+
+        if(command.startsWith("#") || command.equals(".") || command.equals(""))
         {
             return nop;
         }
@@ -92,7 +129,6 @@ public class Interpreter {
         else
         {
             throw new Exception("Invalid command " + command);
-            
         }
     }
 
@@ -113,9 +149,8 @@ public class Interpreter {
 
     private int parseJumpCommand(String[] tokens) throws Exception
     {
-        int instruction;
         String command, label;
-        
+
         if(tokens.length != 2)
         {
             throw new Exception("Invalid number of arguments for jump command " + tokens.toString());
@@ -123,9 +158,10 @@ public class Interpreter {
 
         command = tokens[0].toLowerCase();
         label = tokens[1].toLowerCase();
-        
+
         if(command.equals("jmp"))
         {
+            addJumpLabel(label);
             jumpToLabel(label);
         }
         else if(command.equals(":"))
@@ -152,7 +188,7 @@ public class Interpreter {
 
         command = tokens[0].toLowerCase();
         dest = tokens[1].toLowerCase();
-        
+
         if(isRegisterIdentifier(dest))
         {
             register = (byte)getNumber(dest);
@@ -190,7 +226,7 @@ public class Interpreter {
         register = tokens[1].toLowerCase();
         dest = tokens[2].toLowerCase();
         label = tokens[3].toLowerCase();
-
+        addJumpLabel(label);
         sourceRegister = (byte)getNumber(register);
         if(isRegisterIdentifier(dest))
         {
@@ -264,15 +300,15 @@ public class Interpreter {
         {
             return true;
         }
-        
-        return false;   
+
+        return false;
     }
-    
+
     private short getNumber(String number) throws Exception
     {
         short value;
         String register;
-        
+
         // if it's a register
         if(number.startsWith("r"))
         {
@@ -302,7 +338,7 @@ public class Interpreter {
                 throw new Exception("Invalid number format " + number);
             }
         }
-        
+
         return value;
     }
 
@@ -351,11 +387,13 @@ public class Interpreter {
 
     private void addLabel(String label) throws Exception
     {
+        Label l;
         if(labels.containsKey(label))
         {
-            if(((Label)labels.get(label)).getLine() != currentLine)
+            l = ((Label)labels.get(label));
+            if(l.getLine() != currentLine)
             {
-                throw new Exception("Duplacated label " + label);
+                throw new Exception("Duplacated label " + label + " " + currentLine + " and " + l.getLine());
             }
         }
         else
@@ -372,7 +410,7 @@ public class Interpreter {
         }
         else
         {
-            throw new Exception("Label not found" + label + "\n (on interpreter mode labels that are defined after the jump are not found)");
+            throw new Exception("Label not found" + label + "\n");
         }
     }
 
@@ -402,6 +440,42 @@ public class Interpreter {
             result[loop] = (String)nodes.elementAt(loop);
         }
         return result;
+    }
+
+    public int getOpcode(int line) {
+        Integer iline = new Integer(line);
+        if(opcodes.containsKey(iline)) {
+            if(jumpLabels.containsKey(iline)) {
+                lastLabel = (String)jumpLabels.get(iline);
+                inJump = true;
+            }
+            return ((Integer)opcodes.get(iline)).intValue();
+        }
+
+        return  -1;
+    }
+
+    public int getCurrentOpcode() {
+        return getOpcode(getCurrentLine());
+    }
+
+    public void setOpcode(int line, int opcode) {
+        opcodes.put(new Integer(line), new Integer(opcode));
+    }
+
+    public void setCurrentOpcode(int opcode) {
+        opcodes.put(new Integer(getCurrentLine()), new Integer(opcode));
+    }
+
+    private void addJumpLabel(String label) {
+        Integer cl = new Integer(getCurrentLine());
+        if(!jumpLabels.containsKey(cl)) {
+            jumpLabels.put(cl, label);
+        }
+    }
+
+    public int getCurrentLine() {
+        return currentLine - 1;
     }
 
 }
