@@ -47,45 +47,56 @@ public class MobileCanvas extends Canvas implements Drawable{
         Graphics graphics = image.getGraphics();
         graphics.setColor(color);
         graphics.drawLine(x, y, x, y);
+        this.repaint(x, y, 1, 1);
     }
 
     public String getProgram() {
         return program;
     }
 
+    public void clear() {
+        image.getGraphics().fillRect(0, 0, this.getWidth(), this.getHeight());
+    }
+
     public void setProgram(String program) {
         this.program = program;
-        interpreter = new Interpreter(program, machine);
         String line = null;
+        int opcode;
+        clear();
 
         try
         {
+            interpreter = new Interpreter(program, machine);
             line = interpreter.step();
         }
         catch(Exception ex)
         {
-            System.err.println("\nError line: " + line + "\n\t" + ex.getMessage());
+            System.err.println("\nError0 line: " + line + "\n\t" + ex.getMessage());
             return;
         }
 
         machine.clear();
-        int code;
 
         while(line != null)
         {
+            opcode = interpreter.getCurrentOpcode();
+
             try
             {
-                code = interpreter.parseLine(line);
+                if(opcode == -1) {
+                    opcode = interpreter.parseLine(line);
+                    interpreter.setCurrentOpcode(opcode);
+                }
             }
             catch(Exception ex)
             {
-                System.err.println("\nError line: " + line + "\n\t" + ex.getMessage());
+                System.err.println("\nError1 line: " + line + "\n\t" + ex.getMessage());
                 break;
             }
 
             try
             {
-                machine.execute(code);
+                machine.execute(opcode);
             }
             catch(Exception ex)
             {
@@ -99,7 +110,7 @@ public class MobileCanvas extends Canvas implements Drawable{
             }
             catch(Exception ex)
             {
-                System.err.println("\nError line: " + line + "\n\t" + ex.getMessage());
+                System.err.println("\nError2 line: " + line + "\n\t" + ex.getMessage());
                 break;
             }
         }
