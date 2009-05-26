@@ -48,6 +48,7 @@ public class MobileCanvas extends Canvas implements Drawable{
         graphics.setColor(color);
         graphics.drawLine(x, y, x, y);
         this.repaint(x, y, 1, 1);
+        this.serviceRepaints();
     }
 
     public String getProgram() {
@@ -55,14 +56,17 @@ public class MobileCanvas extends Canvas implements Drawable{
     }
 
     public void clear() {
-        image.getGraphics().fillRect(0, 0, this.getWidth(), this.getHeight());
+        Graphics g = image.getGraphics();
+        g.setColor(0);
+        g.fillRect(0, 0, image.getWidth() - 1, image.getHeight() - 1);
+        this.repaint();
+        this.serviceRepaints();
     }
 
     public void setProgram(String program) {
         this.program = program;
         String line = null;
         int opcode;
-        clear();
 
         try
         {

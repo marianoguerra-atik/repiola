@@ -237,9 +237,9 @@ public class Repiola extends MIDlet implements CommandListener {
     {
         Storage.save("code", textBox.getString(), 1);
         getMobileCanvas().newImage(getDisplay().getCurrent().getWidth(), getDisplay().getCurrent().getWidth());
+        getMobileCanvas().clear();
         getDisplay().setCurrent(getMobileCanvas());
-        getMobileCanvas().repaint();
-        getDisplay().callSerially(new Thread(){public void run(){getMobileCanvas().setProgram(textBox.getString());getMobileCanvas().repaint();}});
+        getDisplay().callSerially(new Thread(){public void run(){getMobileCanvas().setProgram(textBox.getString());}});
     }
     /**
      * Called when MIDlet is paused.
