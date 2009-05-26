@@ -37,7 +37,6 @@ public class SwingCanvas extends Canvas implements Drawable{
 
     public void clear()
     {
-
         getGraphics().fillRect(0, 0, this.getWidth(), this.getHeight());
     }
 
