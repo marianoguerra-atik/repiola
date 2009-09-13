@@ -31,13 +31,36 @@ public class SwingCanvas extends Canvas implements Drawable{
 
 
     public void setPixel(int x, int y, int color) {
+        int red, green, blue;
+        red = ((color & 31744) >> 10) << 3;
+        green = ((color & 992) >> 5) << 3;
+        blue = (color & 31) << 3;
+
+        if(red != 0) {
+            red |= 7;
+        }
+
+        if(green != 0) {
+            green |= 7;
+        }
+
+        if(blue != 0) {
+            blue |= 7;
+        }
+        
+        color = red << 16;
+        color |= green << 8;
+        color |= blue;
         image.setRGB(x, y, color);
         this.repaint(x, y, 1, 1);
     }
 
     public void clear()
     {
-        getGraphics().fillRect(0, 0, this.getWidth(), this.getHeight());
+        Graphics graph = image.getGraphics();
+        graph.setColor(Color.BLACK);
+        graph.fillRect(0, 0, this.getWidth(), this.getHeight());
+        this.repaint();
     }
 
 }
