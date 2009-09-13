@@ -15,13 +15,13 @@ hexadecimal notation (append 0x to the begining of the number)
 set r0 0xff0000
 }}}
 
-octal notation (append xo to the begining of the number)
+octal notation (append 0o to the begining of the number)
 
 {{{
 set r0 0o777
 }}}
 
-binary notation (append xb to the begining of the number)
+binary notation (append 0b to the begining of the number)
 
 {{{
 set r0 0b00100010
