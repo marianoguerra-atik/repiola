@@ -307,7 +307,8 @@ public class Interpreter {
     private short getNumber(String number) throws Exception
     {
         short value;
-        String register;
+        int base;
+        String register, numberValue;
 
         // if it's a register
         if(number.startsWith("r"))
@@ -326,18 +327,39 @@ public class Interpreter {
             {
                 throw new Exception("Register max identifier exceeded" + register);
             }
+
+            return value;
+        }
+        else if(number.startsWith("0x"))
+        {
+            base = 16;
+            numberValue = number.substring(2);
+        }
+        else if(number.startsWith("0b"))
+        {
+            base = 2;
+            numberValue = number.substring(2);
+        }
+        else if(number.startsWith("0o"))
+        {
+            base = 8;
+            numberValue = number.substring(2);
         }
         else
         {
-            try
-            {
-                value = (short)Integer.parseInt(number);
-            }
-            catch(NumberFormatException ex)
-            {
-                throw new Exception("Invalid number format " + number);
-            }
+            base = 10;
+            numberValue = number;
         }
+
+        try
+        {
+            value = Short.parseShort(numberValue, base);
+        }
+        catch(NumberFormatException ex)
+        {
+            throw new Exception("Invalid number format " + number);
+        }
+
 
         return value;
     }

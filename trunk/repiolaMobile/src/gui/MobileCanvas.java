@@ -44,6 +44,28 @@ public class MobileCanvas extends Canvas implements Drawable{
 
     public void setPixel(int x, int y, int color) {
         changed = true;
+
+        int red, green, blue;
+        red = ((color & 31744) >> 10) << 3;
+        green = ((color & 992) >> 5) << 3;
+        blue = (color & 31) << 3;
+
+        if(red != 0) {
+            red |= 7;
+        }
+
+        if(green != 0) {
+            green |= 7;
+        }
+
+        if(blue != 0) {
+            blue |= 7;
+        }
+
+        color = red << 16;
+        color |= green << 8;
+        color |= blue;
+
         Graphics graphics = image.getGraphics();
         graphics.setColor(color);
         graphics.drawLine(x, y, x, y);
@@ -57,7 +79,7 @@ public class MobileCanvas extends Canvas implements Drawable{
 
     public void clear() {
         Graphics g = image.getGraphics();
-        g.setColor(0);
+        g.setColor(0, 0, 0);
         g.fillRect(0, 0, image.getWidth() - 1, image.getHeight() - 1);
         this.repaint();
         this.serviceRepaints();
@@ -80,6 +102,7 @@ public class MobileCanvas extends Canvas implements Drawable{
         }
 
         machine.clear();
+        clear();
 
         while(line != null)
         {
