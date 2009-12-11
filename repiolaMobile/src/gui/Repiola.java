@@ -145,7 +145,7 @@ public class Repiola extends MIDlet implements CommandListener {
     public TextBox getTextBox() {
         if (textBox == null) {//GEN-END:|16-getter|0|16-preInit
             // write pre-init user code here
-            textBox = new TextBox("code", ": begin\nset r0 0\nset r1 r3\nadd r3 5\nge r3 200 end\n: loop\nput r2\nsub r1 1\nadd r0 1\nadd r2 1\nge r1 1 loop\njmp begin\n: end\nset r0 0\nset r1 0\nset r3 0\n: step\nset r1 r3\nadd r3 5\nset r0 0\nge r3 200 fin\n: b1\nput r2\nadd r0 1\nadd r1 1\nadd r2 1\nge r1 200 step\njmp b1\n: fin\n\n", 5000, TextField.ANY);//GEN-BEGIN:|16-getter|1|16-postInit
+            textBox = new TextBox("code", ": loop\n\nset r3 r0\nmul r3 r3\n\nset r4 r1\nmul r4 r4\n\nset r2 r3\nadd r2 r4\n\nge r0 199 ay\nadd r0 1\nput r2\njmp loop\n\n: ay\nge r1 199 end\nset r0 0\nadd r1 1\njmp loop\n\n: end\n", 5000, TextField.ANY);//GEN-BEGIN:|16-getter|1|16-postInit
             textBox.addCommand(getBackCommand());
             textBox.addCommand(getOkCommand());
             textBox.setCommandListener(this);//GEN-END:|16-getter|1|16-postInit

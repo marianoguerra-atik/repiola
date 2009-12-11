@@ -18,14 +18,18 @@ public class MobileCanvas extends Canvas implements Drawable{
     private String program;
     private Machine machine;
     private Interpreter interpreter;
+    private int rgbData[] = new int[1];
+    private Graphics graphics;
 
     public MobileCanvas() {
         image = Image.createImage(200, 200);
+        graphics = image.getGraphics();
         machine = new Machine(this);
     }
 
     public void newImage(int width, int height) {
         image = Image.createImage(width, height);
+        graphics = image.getGraphics();
     }
 
 
@@ -39,7 +43,18 @@ public class MobileCanvas extends Canvas implements Drawable{
     }
 
     public int getPixel(int x, int y) {
-        return this.getPixel(x, y);
+        int red, green, blue, color, val;
+
+        image.getRGB(rgbData, 0, 1, x, y, 1, 1);
+        color = rgbData[0];
+
+        color = color & 0x00FFFFFF;
+        blue = (color & 0xFF) >> 3;
+        green = ((color >> 8) & 0xFF) >> 3;
+        red = ((color >> 16) & 0xFF) >> 3;
+
+        val = (red << 10) | (green << 5) | blue;
+        return val;
     }
 
     public void setPixel(int x, int y, int color) {
@@ -66,7 +81,6 @@ public class MobileCanvas extends Canvas implements Drawable{
         color |= green << 8;
         color |= blue;
 
-        Graphics graphics = image.getGraphics();
         graphics.setColor(color);
         graphics.drawLine(x, y, x, y);
         this.repaint(x, y, 1, 1);
@@ -78,9 +92,9 @@ public class MobileCanvas extends Canvas implements Drawable{
     }
 
     public void clear() {
-        Graphics g = image.getGraphics();
-        g.setColor(0, 0, 0);
-        g.fillRect(0, 0, image.getWidth() - 1, image.getHeight() - 1);
+        changed = true;
+        graphics.setColor(0, 0, 0);
+        graphics.fillRect(0, 0, image.getWidth() - 1, image.getHeight() - 1);
         this.repaint();
         this.serviceRepaints();
     }
