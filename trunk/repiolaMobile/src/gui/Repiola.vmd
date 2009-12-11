@@ -47,7 +47,7 @@
                     <Property name="commands" typeID="1C#CommandEventSource" value="A2:3_R183_R20"/>
                     <Property name="title" typeID="Pjava.lang.String" value="Vcode"/>
                     <Property name="commandListener" typeID="C#CommandListener" value="R7"/>
-                    <Property name="string" typeID="Pjava.lang.String" value="V: begin&#10;set r0 0&#10;set r1 r3&#10;add r3 5&#10;ge r3 200 end&#10;: loop&#10;put r2&#10;sub r1 1&#10;add r0 1&#10;add r2 1&#10;ge r1 1 loop&#10;jmp begin&#10;: end&#10;set r0 0&#10;set r1 0&#10;set r3 0&#10;: step&#10;set r1 r3&#10;add r3 5&#10;set r0 0&#10;ge r3 200 fin&#10;: b1&#10;put r2&#10;add r0 1&#10;add r1 1&#10;add r2 1&#10;ge r1 200 step&#10;jmp b1&#10;: fin&#10;&#10;"/>
+                    <Property name="string" typeID="Pjava.lang.String" value="V: loop&#10;&#10;set r3 r0&#10;mul r3 r3&#10;&#10;set r4 r1&#10;mul r4 r4&#10;&#10;set r2 r3&#10;add r2 r4&#10;&#10;ge r0 199 ay&#10;add r0 1&#10;put r2&#10;jmp loop&#10;&#10;: ay&#10;ge r1 199 end&#10;set r0 0&#10;add r1 1&#10;jmp loop&#10;&#10;: end&#10;"/>
                     <Property name="maxSize" typeID="Pint" value="V5000"/>
                     <Component componentID="18" typeID="C#CommandEventSource">
                         <Property name="eventHandler" typeID="C#EventHandler" value="R28"/>
@@ -92,8 +92,8 @@
     </Document>
     <FlowScene version="1">
         <Node componentID="2" descriptorID="componentNode2" x="50" y="231"/>
-        <Node componentID="14" descriptorID="componentNode14" x="474" y="280"/>
-        <Node componentID="16" descriptorID="componentNode16" x="302" y="54"/>
         <Node componentID="36" descriptorID="componentNode36" x="512" y="141"/>
+        <Node componentID="16" descriptorID="componentNode16" x="302" y="54"/>
+        <Node componentID="14" descriptorID="componentNode14" x="474" y="280"/>
     </FlowScene>
 </VisualDesign>
