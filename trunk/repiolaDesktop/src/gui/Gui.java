@@ -58,7 +58,7 @@ public class Gui extends javax.swing.JFrame {
 
         code.setColumns(20);
         code.setRows(5);
-        code.setText("set r0 100\nset r1 100\n: begin\neq r0 0 end\neq r1 0 end\neq r0 198 end\neq r1 198 end\nadd r3 2\nset r6 r3\nadd r4 1\nlt r4 4 next\nset r4 0\n: next\n: draw\nput r2\nadd r2 10\nsub r6 1\nne r4 0 check-1\nsub r1 1\njmp done\n: check-1\nne r4 1 check-2\nsub r0 1\njmp done\n: check-2\nne r4 2 check-3\nadd r1 1\njmp done\n: check-3\nadd r0 1\n: done\neq r6 0 begin\njmp draw\n: end\n");
+        code.setText(": loop\n\nset r3 r0\nmul r3 r3\n\nset r4 r1\nmul r4 r4\n\nset r2 r3\nadd r2 r4\n\nge r0 199 ay\nadd r0 1\nput r2\njmp loop\n\n: ay\nge r1 199 end\nset r0 0\nadd r1 1\njmp loop\n\n: end\n");
         scrollText.setViewportView(code);
 
         run.setText("run");

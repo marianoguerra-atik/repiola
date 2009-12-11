@@ -20,7 +20,14 @@ public class SwingCanvas extends Canvas implements Drawable{
     }
     
     public int getPixel(int x, int y) {
-        return image.getRGB(x, y);
+        int red, green, blue, color, val;
+        color = image.getRGB(x, y) & 0x00FFFFFF;
+        blue = (color & 0xFF) >> 3;
+        green = ((color >> 8) & 0xFF) >> 3;
+        red = ((color >> 16) & 0xFF) >> 3;
+
+        val = (red << 10) | (green << 5) | blue;
+        return val;
     }
 
     @Override

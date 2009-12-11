@@ -60,7 +60,7 @@
           <Properties>
             <Property name="columns" type="int" value="20"/>
             <Property name="rows" type="int" value="5"/>
-            <Property name="text" type="java.lang.String" value="set r0 100&#xa;set r1 100&#xa;: begin&#xa;eq r0 0 end&#xa;eq r1 0 end&#xa;eq r0 198 end&#xa;eq r1 198 end&#xa;add r3 2&#xa;set r6 r3&#xa;add r4 1&#xa;lt r4 4 next&#xa;set r4 0&#xa;: next&#xa;: draw&#xa;put r2&#xa;add r2 10&#xa;sub r6 1&#xa;ne r4 0 check-1&#xa;sub r1 1&#xa;jmp done&#xa;: check-1&#xa;ne r4 1 check-2&#xa;sub r0 1&#xa;jmp done&#xa;: check-2&#xa;ne r4 2 check-3&#xa;add r1 1&#xa;jmp done&#xa;: check-3&#xa;add r0 1&#xa;: done&#xa;eq r6 0 begin&#xa;jmp draw&#xa;: end&#xa;"/>
+            <Property name="text" type="java.lang.String" value=": loop&#xa;&#xa;set r3 r0&#xa;mul r3 r3&#xa;&#xa;set r4 r1&#xa;mul r4 r4&#xa;&#xa;set r2 r3&#xa;add r2 r4&#xa;&#xa;ge r0 199 ay&#xa;add r0 1&#xa;put r2&#xa;jmp loop&#xa;&#xa;: ay&#xa;ge r1 199 end&#xa;set r0 0&#xa;add r1 1&#xa;jmp loop&#xa;&#xa;: end&#xa;"/>
           </Properties>
         </Component>
       </SubComponents>
