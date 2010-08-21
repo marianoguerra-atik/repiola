@@ -56,11 +56,13 @@ public class Machine {
     public static final byte I_RLE = 17;
     public static final byte I_JUMP = 106;
     public static final byte I_NOP = 0;
+    public static final byte I_CLR = 18;
+
 
     // instructions that contain register as second byte
     public static final int[] I_SOURCE_REGISTER = {I_RANDOM, I_GET, I_ADD, I_RADD, I_SUB, I_RSUB, I_MUL, I_RMUL, I_DIV, I_RDIV, I_MOD, I_RMOD, I_AND, I_RAND, I_OR, I_ROR, I_XOR, I_RXOR, I_NOT, I_SET, I_RSET, I_EQ, I_REQ, I_NE, I_RNE, I_GT, I_RGT, I_GE, I_RGE, I_LT, I_RLT, I_LE, I_RLE};
     // instructions that contain a pixel color xppx
-    public static final int[] I_PIXEL = {I_PUT, I_RPUT};
+    public static final int[] I_PIXEL = {I_PUT, I_RPUT, I_CLR};
     // instructions that contain a number xxnn
     public static final int[] I_NUMBER = {I_ADD, I_SUB, I_MUL, I_DIV, I_MOD, I_AND, I_OR, I_XOR, I_SET, I_EQ, I_NE, I_GT, I_GE, I_LT, I_LE};
     // instructions that contain a number xxnn
@@ -103,6 +105,10 @@ public class Machine {
 
     public void setY(int y) {
         registers[1] = y;
+    }
+
+    public void clearScreen(int color) {
+        this.screen.clear(color);
     }
 
     public boolean isInJump() {
@@ -176,6 +182,10 @@ public class Machine {
             {
                 register = (byte)((instruction & MASK_SOURCE_REGISTER) >> 16);
             }
+            else if(instr == I_CLR)
+            {
+                pixel = (short)((instruction & MASK_PIXEL_COLOR) >> 8);
+            }
         }
 
         if(isNumberInstruction(instr))
@@ -226,6 +236,7 @@ public class Machine {
             case I_LE: setJump(registers[register] <= number);break;
             case I_RLE: setJump(registers[register] <= registers[dest_register]);break;
             case I_JUMP: setJump(true);break;
+            case I_CLR: clearScreen(pixel);break;
             case I_NOP: ;break;
 
             default: throw new Exception("Invalid instruction " + instr);

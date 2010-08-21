@@ -23,9 +23,9 @@ public class Interpreter {
     private String lastLabel;
 
     private static final String[] commands =  {"put", "#", ":", "jmp",
-     "add", "sub", "mul", "div", "mod", "set", "or", "and", "xor", "not", "eq", "ne", "gt", "lt", "ge", "le", "get", ".", "rnd"};
+     "add", "sub", "mul", "div", "mod", "set", "or", "and", "xor", "not", "eq", "ne", "gt", "lt", "ge", "le", "get", ".", "rnd", "clr"};
     private static final String[] jumpCommands =  {"jmp", ":"};
-    private static final String[] singleCommands =  {"put", "get", "rnd", "not"};
+    private static final String[] singleCommands =  {"put", "get", "rnd", "not", "clr"};
     private static final String[] registerCommands =  {"add", "sub", "mul", "div", "mod", "set", "or", "and", "xor"};
     private static final String[] compareCommands =  {"eq", "ne", "gt", "lt", "ge", "le"};
 
@@ -204,6 +204,7 @@ public class Interpreter {
         else if(command.equals("get") && !isNumber)instruction = buildSingleInstruction(isNumber, Machine.I_GET, (byte)0, register);
         else if(command.equals("not") && !isNumber)instruction = buildSingleInstruction(isNumber, Machine.I_NOT, (byte)0, register);
         else if(command.equals("rnd") && !isNumber)instruction = buildSingleInstruction(isNumber, Machine.I_RANDOM, (byte)0, register);
+        else if(command.equals("clr") && isNumber)instruction = buildSingleInstruction(isNumber, Machine.I_CLR, number, (byte)0);
         else throw new Exception("Invalid compare command");
 
         return instruction;
@@ -359,7 +360,7 @@ public class Interpreter {
         {
             throw new Exception("Invalid number format " + number);
         }
-        
+
 
         return value;
     }

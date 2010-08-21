@@ -12,4 +12,6 @@ package gui;
 public interface Drawable {
     int getPixel(int x, int y);
     void setPixel(int x, int y, int color);
+    void clear(int color);
+    void clear();
 }
