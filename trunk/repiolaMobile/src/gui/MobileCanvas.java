@@ -32,6 +32,10 @@ public class MobileCanvas extends Canvas implements Drawable{
         graphics = image.getGraphics();
     }
 
+    public void clear() {
+        clear(0);
+    }
+
 
     protected void paint(Graphics g) {
         if(changed)
@@ -87,13 +91,39 @@ public class MobileCanvas extends Canvas implements Drawable{
         this.serviceRepaints();
     }
 
+     public int getColor(int color) {
+        int red, green, blue;
+        red = ((color & 31744) >> 10) << 3;
+        green = ((color & 992) >> 5) << 3;
+        blue = (color & 31) << 3;
+
+        if(red != 0) {
+            red |= 7;
+        }
+
+        if(green != 0) {
+            green |= 7;
+        }
+
+        if(blue != 0) {
+            blue |= 7;
+        }
+
+        color = red << 16;
+        color |= green << 8;
+        color |= blue;
+
+        return color;
+    }
+
     public String getProgram() {
         return program;
     }
 
-    public void clear() {
+    public void clear(int color) {
         changed = true;
-        graphics.setColor(0, 0, 0);
+        
+        graphics.setColor(getColor(color));
         graphics.fillRect(0, 0, image.getWidth() - 1, image.getHeight() - 1);
         this.repaint();
         this.serviceRepaints();
