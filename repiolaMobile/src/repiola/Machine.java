@@ -6,6 +6,7 @@
 package repiola;
 import gui.Drawable;
 import java.util.Random;
+import java.util.Stack;
 /**
  *
  * @author mariano
@@ -57,12 +58,16 @@ public class Machine {
     public static final byte I_JUMP = 106;
     public static final byte I_NOP = 0;
     public static final byte I_CLR = 18;
+    public static final byte I_RCLR = 19;
+    public static final byte I_PUSH = 20;
+    public static final byte I_RPUSH = 21;
+    public static final byte I_RPOP = 22;
 
 
     // instructions that contain register as second byte
     public static final int[] I_SOURCE_REGISTER = {I_RANDOM, I_GET, I_ADD, I_RADD, I_SUB, I_RSUB, I_MUL, I_RMUL, I_DIV, I_RDIV, I_MOD, I_RMOD, I_AND, I_RAND, I_OR, I_ROR, I_XOR, I_RXOR, I_NOT, I_SET, I_RSET, I_EQ, I_REQ, I_NE, I_RNE, I_GT, I_RGT, I_GE, I_RGE, I_LT, I_RLT, I_LE, I_RLE};
     // instructions that contain a pixel color xppx
-    public static final int[] I_PIXEL = {I_PUT, I_RPUT, I_CLR};
+    public static final int[] I_PIXEL = {I_PUT, I_RPUT, I_CLR, I_RCLR, I_PUSH, I_RPUSH, I_RPOP};
     // instructions that contain a number xxnn
     public static final int[] I_NUMBER = {I_ADD, I_SUB, I_MUL, I_DIV, I_MOD, I_AND, I_OR, I_XOR, I_SET, I_EQ, I_NE, I_GT, I_GE, I_LT, I_LE};
     // instructions that contain a number xxnn
@@ -76,11 +81,13 @@ public class Machine {
     private int []registers;
     private Random generator;
     private Drawable screen;
+    private Stack stack;
 
     public Machine(Drawable screen) {
         registers = new int[REGISTER_NUMBER];
         generator = new Random();
         this.screen = screen;
+        stack = new Stack();
     }
 
     public int[] getRegisters() {
@@ -89,6 +96,14 @@ public class Machine {
 
     public void setRegisters(int[] registers) {
         this.registers = registers;
+    }
+
+    public void push(int val) {
+        stack.push(new Integer(val));
+    }
+
+    public int pop() {
+        return ((Integer)stack.pop()).intValue();
     }
 
     public int getX() {
@@ -174,17 +189,13 @@ public class Machine {
 
         if(isPixelInstruction(instr))
         {
-            if(instr == I_PUT)
+            if(instr == I_PUT || instr == I_CLR || instr == I_PUSH)
             {
                 pixel = (short)((instruction & MASK_PIXEL_COLOR) >> 8);
             }
-            else if(instr == I_RPUT)
+            else if(instr == I_RPUT || instr == I_RCLR || instr == I_RPUSH || instr == I_RPOP)
             {
                 register = (byte)((instruction & MASK_SOURCE_REGISTER) >> 16);
-            }
-            else if(instr == I_CLR)
-            {
-                pixel = (short)((instruction & MASK_PIXEL_COLOR) >> 8);
             }
         }
 
@@ -237,6 +248,10 @@ public class Machine {
             case I_RLE: setJump(registers[register] <= registers[dest_register]);break;
             case I_JUMP: setJump(true);break;
             case I_CLR: clearScreen(pixel);break;
+            case I_RCLR: clearScreen(registers[register]);break;
+            case I_PUSH: push(pixel);break;
+            case I_RPUSH: push(registers[register]);break;
+            case I_RPOP: registers[register] = pop();break;
             case I_NOP: ;break;
 
             default: throw new Exception("Invalid instruction " + instr);

@@ -23,9 +23,9 @@ public class Interpreter {
     private String lastLabel;
 
     private static final String[] commands =  {"put", "#", ":", "jmp",
-     "add", "sub", "mul", "div", "mod", "set", "or", "and", "xor", "not", "eq", "ne", "gt", "lt", "ge", "le", "get", ".", "rnd", "clr"};
+     "add", "sub", "mul", "div", "mod", "set", "or", "and", "xor", "not", "eq", "ne", "gt", "lt", "ge", "le", "get", ".", "rnd", "clr", "push", "pop"};
     private static final String[] jumpCommands =  {"jmp", ":"};
-    private static final String[] singleCommands =  {"put", "get", "rnd", "not", "clr"};
+    private static final String[] singleCommands =  {"put", "get", "rnd", "not", "clr", "push", "pop"};
     private static final String[] registerCommands =  {"add", "sub", "mul", "div", "mod", "set", "or", "and", "xor"};
     private static final String[] compareCommands =  {"eq", "ne", "gt", "lt", "ge", "le"};
 
@@ -87,6 +87,7 @@ public class Interpreter {
 
         return null;
     }
+
 
     public int parseLine(String line) throws Exception
     {
@@ -205,7 +206,11 @@ public class Interpreter {
         else if(command.equals("not") && !isNumber)instruction = buildSingleInstruction(isNumber, Machine.I_NOT, (byte)0, register);
         else if(command.equals("rnd") && !isNumber)instruction = buildSingleInstruction(isNumber, Machine.I_RANDOM, (byte)0, register);
         else if(command.equals("clr") && isNumber)instruction = buildSingleInstruction(isNumber, Machine.I_CLR, number, (byte)0);
-        else throw new Exception("Invalid compare command");
+        else if(command.equals("clr") && !isNumber)instruction = buildSingleInstruction(isNumber, Machine.I_RCLR, (byte)0, register);
+        else if(command.equals("push") && isNumber)instruction = buildSingleInstruction(isNumber, Machine.I_PUSH, number, (byte)0);
+        else if(command.equals("push") && !isNumber)instruction = buildSingleInstruction(isNumber, Machine.I_RPUSH, (byte)0, register);
+        else if(command.equals("pop") && !isNumber)instruction = buildSingleInstruction(isNumber, Machine.I_RPOP, (byte)0, register);
+        else throw new Exception("Invalid single command");
 
         return instruction;
     }
@@ -290,7 +295,7 @@ public class Interpreter {
         else if(command.equals("or"))instruction = buildRegisterInstruction(isNumber, Machine.I_OR, Machine.I_ROR, number, sourceRegister, destinationRegister);
         else if(command.equals("xor"))instruction = buildRegisterInstruction(isNumber, Machine.I_XOR, Machine.I_RXOR, number, sourceRegister, destinationRegister);
         else if(command.equals("set"))instruction = buildRegisterInstruction(isNumber, Machine.I_SET, Machine.I_RSET, number, sourceRegister, destinationRegister);
-        else throw new Exception("Invalid compare command");
+        else throw new Exception("Invalid register command");
 
         return instruction;
     }
