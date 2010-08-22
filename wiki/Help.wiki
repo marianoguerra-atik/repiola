@@ -56,6 +56,9 @@ The instructions are the following
   * {{{put 4 # draws a pixel of the color 4 in the position defined by (r0, r1)}}}
  * get: set the value of the specified register to the value of the pixel stored in (r0, r1)
   * {{{get r2 # store the color of the pixel in (r0, r1) in r2}}}
+ * clr: clear the screen with a given color
+  * {{{clr 4 # clear the screen with the RGB color 4}}}
+  * {{{clr r2 # clear the screen with the RGB color stored in register 2}}}
 
 == Jump instructions ==
 
@@ -80,6 +83,14 @@ The instructions are the following
  * le: jump to a label if the first value is lower or equal than the second value
   * {{{le r1 10 foo # jump to foo if r1 <= 10}}}
   * {{{le r1 r2 foo # jump to foo if r1 <= r2}}}
+
+== Stack instructions ==
+
+ * push: push a value to the stack
+  * {{{push 4 # push the value 4 to the stack}}}
+  * {{{push r2 # push the value stored in the register 2 to the stack}}}
+ * pop: pop the value stored at the top of the stack and store it in a register
+  * {{{pop r2 # pop the value stored at the top of the stack and store it in the register 2}}}
 
 == Special instructions ==
 
