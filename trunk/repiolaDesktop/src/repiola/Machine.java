@@ -1,17 +1,15 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
-
 package repiola;
+
 import gui.Drawable;
 import java.util.Random;
 import java.util.Stack;
+
 /**
  *
  * @author mariano
  */
 public class Machine {
+
     public static final int REGISTER_NUMBER = 8;
     public static final int REGISTER_MAX_NUMBER = 256;
     public static final int MASK_INSTRUCTION = 0xFF000000;
@@ -19,7 +17,6 @@ public class Machine {
     public static final int MASK_SOURCE_REGISTER = 0x00FF0000;
     public static final int MASK_NUMBER = 0x0000FFFF;
     public static final int MASK_DESTINATION_REGISTER = 0x0000FF00;
-
     public static final byte I_PUT = 112;
     public static final byte I_RPUT = 113;
     public static final byte I_GET = 115;
@@ -65,8 +62,6 @@ public class Machine {
     public static final byte I_RPOP = 22;
     public static final byte I_CALL = 23;
     public static final byte I_RET = 24;
-
-
     // instructions that contain register as second byte
     public static final int[] I_SOURCE_REGISTER = {I_RANDOM, I_GET, I_ADD, I_RADD, I_SUB, I_RSUB, I_MUL, I_RMUL, I_DIV, I_RDIV, I_MOD, I_RMOD, I_AND, I_RAND, I_OR, I_ROR, I_XOR, I_RXOR, I_NOT, I_SET, I_RSET, I_EQ, I_REQ, I_NE, I_RNE, I_GT, I_RGT, I_GE, I_RGE, I_LT, I_RLT, I_LE, I_RLE};
     // instructions that contain a pixel color xppx
@@ -77,11 +72,10 @@ public class Machine {
     public static final int[] I_DESTINATION_REGISTER = {I_RADD, I_RSUB, I_RMUL, I_RDIV, I_RMOD, I_RAND, I_ROR, I_RXOR, I_RSET, I_REQ, I_RNE, I_RGT, I_RGE, I_RLT, I_RLE};
     // instructions that are followed by a jump address
     public static final int[] I_LABEL = {I_EQ, I_NE, I_GT, I_GE, I_LT, I_LE, I_JUMP, I_CALL};
-
     private int instructionPointer;
     private boolean inJump;
     private boolean jump;
-    private int []registers;
+    private int[] registers;
     private Random generator;
     private Drawable screen;
     private Stack stack;
@@ -106,7 +100,7 @@ public class Machine {
     }
 
     public int pop() {
-        return ((Integer)stack.pop()).intValue();
+        return ((Integer) stack.pop()).intValue();
     }
 
     public int getX() {
@@ -153,29 +147,26 @@ public class Machine {
         this.jump = jump;
     }
 
-    public void run (int[] instructions) throws Exception {
+    public void run(int[] instructions) throws Exception {
         int size = instructions.length;
         this.instructionPointer = 0;
-        
+
         while (this.instructionPointer < size) {
             execute(instructions[instructionPointer]);
         }
     }
 
-    public boolean step (int[] instructions) throws Exception {
+    public boolean step(int[] instructions) throws Exception {
         execute(instructions[instructionPointer]);
         return instructionPointer < instructions.length;
     }
 
-    public void execute(int instruction) throws Exception
-    {
-        byte instr, register=0, dest_register=0;
-        short pixel=0, number=0;
+    public void execute(int instruction) throws Exception {
+        byte instr, register = 0, dest_register = 0;
+        short pixel = 0, number = 0;
 
-        if(inJump)
-        {
-            if(jump)
-            {
+        if (inJump) {
+            if (jump) {
                 instructionPointer = instruction;
             }
 
@@ -183,136 +174,209 @@ public class Machine {
             return;
         }
 
-        instr = (byte)((instruction & MASK_INSTRUCTION) >> 24);
-        if(isSourceRegisterInstruction(instr))
-        {
-            register = (byte)((instruction & MASK_SOURCE_REGISTER) >> 16);
+        instr = (byte) ((instruction & MASK_INSTRUCTION) >> 24);
+        if (isSourceRegisterInstruction(instr)) {
+            register = (byte) ((instruction & MASK_SOURCE_REGISTER) >> 16);
 
-            if(register >= Machine.REGISTER_NUMBER)
-            {
+            if (register >= Machine.REGISTER_NUMBER) {
                 throw new Exception("Invalid register number");
             }
         }
 
-        if(isDestinationRegisterInstruction(instr))
-        {
-            dest_register = (byte)((instruction & MASK_DESTINATION_REGISTER) >> 8);
+        if (isDestinationRegisterInstruction(instr)) {
+            dest_register = (byte) ((instruction & MASK_DESTINATION_REGISTER) >> 8);
 
-            if(dest_register >= Machine.REGISTER_NUMBER)
-            {
+            if (dest_register >= Machine.REGISTER_NUMBER) {
                 throw new Exception("Invalid register number");
             }
         }
 
-        if(isPixelInstruction(instr))
-        {
-            if(instr == I_PUT || instr == I_CLR || instr == I_PUSH)
-            {
-                pixel = (short)((instruction & MASK_PIXEL_COLOR) >> 8);
-            }
-            else if(instr == I_RPUT || instr == I_RCLR || instr == I_RPUSH || instr == I_RPOP || instr == I_RJUMP)
-            {
-                register = (byte)((instruction & MASK_SOURCE_REGISTER) >> 16);
+        if (isPixelInstruction(instr)) {
+            if (instr == I_PUT || instr == I_CLR || instr == I_PUSH) {
+                pixel = (short) ((instruction & MASK_PIXEL_COLOR) >> 8);
+            } else if (instr == I_RPUT || instr == I_RCLR || instr == I_RPUSH || instr == I_RPOP || instr == I_RJUMP) {
+                register = (byte) ((instruction & MASK_SOURCE_REGISTER) >> 16);
             }
         }
 
-        if(isNumberInstruction(instr))
-        {
-            number = (short)(instruction & MASK_NUMBER);
+        if (isNumberInstruction(instr)) {
+            number = (short) (instruction & MASK_NUMBER);
         }
 
-        if(isJumpInstruction(instr))
-        {
+        if (isJumpInstruction(instr)) {
             inJump = true;
         }
 
-        switch(instr)
-        {
-            case I_PUT: setPixel(pixel);break;
-            case I_RPUT: setPixel(registers[register]);break;
-            case I_GET: getPixel(register);break; // s
-            case I_RANDOM: registers[register] = Math.abs((short)generator.nextInt(0xFFFF));break;
-            case I_ADD: registers[register] += number;break;
-            case I_RADD: registers[register] += registers[dest_register];break;
-            case I_SUB: registers[register] -= number;break;
-            case I_RSUB: registers[register] -= registers[dest_register];break;
-            case I_MUL: registers[register] *= number;break;
-            case I_RMUL: registers[register] *= registers[dest_register];break;
-            case I_DIV: registers[register] /= number;break;
-            case I_RDIV: registers[register] /= registers[dest_register];break;
-            case I_MOD: registers[register] %= number;break;
-            case I_RMOD: registers[register] %= registers[dest_register];break;
-            case I_AND: registers[register] &= number;break;
-            case I_RAND: registers[register] &= registers[dest_register];break;
-            case I_OR: registers[register] |= number;break;
-            case I_ROR: registers[register] |= registers[dest_register];break;
-            case I_XOR: registers[register] ^= number;break;
-            case I_RXOR: registers[register] ^= registers[dest_register];break;
-            case I_NOT: registers[register] = ~registers[register];break;
-            case I_SET: registers[register] = number;break; // =
-            case I_RSET: registers[register] = registers[dest_register];break; // =
-            case I_EQ: setJump(registers[register] == number);break;
-            case I_REQ: setJump(registers[register] == registers[dest_register]);break;
-            case I_NE: setJump(registers[register] != number);break;
-            case I_RNE: setJump(registers[register] != registers[dest_register]);break;
-            case I_GT: setJump(registers[register] > number);break;
-            case I_RGT: setJump(registers[register] > registers[dest_register]);break;
-            case I_GE: setJump(registers[register] >= number);break;
-            case I_RGE: setJump(registers[register] >= registers[dest_register]);break;
-            case I_LT: setJump(registers[register] < number);break;
-            case I_RLT: setJump(registers[register] < registers[dest_register]);break;
-            case I_LE: setJump(registers[register] <= number);break;
-            case I_RLE: setJump(registers[register] <= registers[dest_register]);break;
-            case I_JUMP: setJump(true);break;
-            case I_RJUMP: instructionPointer = registers[register];return;
-            case I_CALL: push(instructionPointer + 2);setJump(true);break;
-            case I_RET: instructionPointer = pop();return;
-            case I_CLR: clearScreen(pixel);break;
-            case I_RCLR: clearScreen(registers[register]);break;
-            case I_PUSH: push(pixel);break;
-            case I_RPUSH: push(registers[register]);break;
-            case I_RPOP: registers[register] = pop();break;
-            case I_NOP: ;break;
+        switch (instr) {
+            case I_PUT:
+                setPixel(pixel);
+                break;
+            case I_RPUT:
+                setPixel(registers[register]);
+                break;
+            case I_GET:
+                getPixel(register);
+                break; // s
+            case I_RANDOM:
+                registers[register] = Math.abs((short) generator.nextInt(0xFFFF));
+                break;
+            case I_ADD:
+                registers[register] += number;
+                break;
+            case I_RADD:
+                registers[register] += registers[dest_register];
+                break;
+            case I_SUB:
+                registers[register] -= number;
+                break;
+            case I_RSUB:
+                registers[register] -= registers[dest_register];
+                break;
+            case I_MUL:
+                registers[register] *= number;
+                break;
+            case I_RMUL:
+                registers[register] *= registers[dest_register];
+                break;
+            case I_DIV:
+                registers[register] /= number;
+                break;
+            case I_RDIV:
+                registers[register] /= registers[dest_register];
+                break;
+            case I_MOD:
+                registers[register] %= number;
+                break;
+            case I_RMOD:
+                registers[register] %= registers[dest_register];
+                break;
+            case I_AND:
+                registers[register] &= number;
+                break;
+            case I_RAND:
+                registers[register] &= registers[dest_register];
+                break;
+            case I_OR:
+                registers[register] |= number;
+                break;
+            case I_ROR:
+                registers[register] |= registers[dest_register];
+                break;
+            case I_XOR:
+                registers[register] ^= number;
+                break;
+            case I_RXOR:
+                registers[register] ^= registers[dest_register];
+                break;
+            case I_NOT:
+                registers[register] = ~registers[register];
+                break;
+            case I_SET:
+                registers[register] = number;
+                break; // =
+            case I_RSET:
+                registers[register] = registers[dest_register];
+                break; // =
+            case I_EQ:
+                setJump(registers[register] == number);
+                break;
+            case I_REQ:
+                setJump(registers[register] == registers[dest_register]);
+                break;
+            case I_NE:
+                setJump(registers[register] != number);
+                break;
+            case I_RNE:
+                setJump(registers[register] != registers[dest_register]);
+                break;
+            case I_GT:
+                setJump(registers[register] > number);
+                break;
+            case I_RGT:
+                setJump(registers[register] > registers[dest_register]);
+                break;
+            case I_GE:
+                setJump(registers[register] >= number);
+                break;
+            case I_RGE:
+                setJump(registers[register] >= registers[dest_register]);
+                break;
+            case I_LT:
+                setJump(registers[register] < number);
+                break;
+            case I_RLT:
+                setJump(registers[register] < registers[dest_register]);
+                break;
+            case I_LE:
+                setJump(registers[register] <= number);
+                break;
+            case I_RLE:
+                setJump(registers[register] <= registers[dest_register]);
+                break;
+            case I_JUMP:
+                setJump(true);
+                break;
+            case I_RJUMP:
+                instructionPointer = registers[register];
+                return;
+            case I_CALL:
+                push(instructionPointer + 2);
+                setJump(true);
+                break;
+            case I_RET:
+                instructionPointer = pop();
+                return;
+            case I_CLR:
+                clearScreen(pixel);
+                break;
+            case I_RCLR:
+                clearScreen(registers[register]);
+                break;
+            case I_PUSH:
+                push(pixel);
+                break;
+            case I_RPUSH:
+                push(registers[register]);
+                break;
+            case I_RPOP:
+                registers[register] = pop();
+                break;
+            case I_NOP:
+                ;
+                break;
 
-            default: throw new Exception("Invalid instruction " + instr);
+            default:
+                throw new Exception("Invalid instruction " + instr);
         }
 
         instructionPointer++;
     }
 
-    public boolean isSourceRegisterInstruction(int instruction)
-    {
+    public boolean isSourceRegisterInstruction(int instruction) {
         return inArray(I_SOURCE_REGISTER, instruction);
     }
 
-    public boolean isDestinationRegisterInstruction(int instruction)
-    {
+    public boolean isDestinationRegisterInstruction(int instruction) {
         return inArray(I_DESTINATION_REGISTER, instruction);
     }
 
-    public boolean isNumberInstruction(int instruction)
-    {
+    public boolean isNumberInstruction(int instruction) {
         return inArray(I_NUMBER, instruction);
     }
 
-    public boolean isPixelInstruction(int instruction)
-    {
+    public boolean isPixelInstruction(int instruction) {
         return inArray(I_PIXEL, instruction);
     }
 
-    public boolean isJumpInstruction(int instruction)
-    {
+    public boolean isJumpInstruction(int instruction) {
         return inArray(I_LABEL, instruction);
     }
 
-    private boolean inArray(int[] array, int number)
-    {
+    private boolean inArray(int[] array, int number) {
         int value;
-        for(int i = 0; i < array.length; i++)
-        {
+        for (int i = 0; i < array.length; i++) {
             value = array[i];
-            if(value == number)
-            {
+            if (value == number) {
                 return true;
             }
         }
@@ -320,16 +384,14 @@ public class Machine {
         return false;
     }
 
-    private int getPixel(short register)
-    {
+    private int getPixel(short register) {
         int color = screen.getPixel(getX(), getY());
 
         registers[register] = color;
         return color;
     }
 
-    private void setPixel(int color)
-    {
+    private void setPixel(int color) {
         screen.setPixel(getX(), getY(), color);
     }
 
@@ -339,29 +401,24 @@ public class Machine {
 
         sb.append("x:" + getX() + " y:" + getY() + " \n");
 
-        for(int i = 0; i < Machine.REGISTER_NUMBER; i++)
-        {
+        for (int i = 0; i < Machine.REGISTER_NUMBER; i++) {
             sb.append("r" + i + ": " + registers[i] + " ");
         }
 
         return sb.toString();
     }
 
-    public String explainInstruction(int instruction)
-    {
-        byte instr = (byte)((instruction & Machine.MASK_INSTRUCTION) >> 24);
+    public String explainInstruction(int instruction) {
+        byte instr = (byte) ((instruction & Machine.MASK_INSTRUCTION) >> 24);
 
         return "Instruction: " + instr;
     }
 
-    public void clear()
-    {
+    public void clear() {
         this.instructionPointer = 0;
 
-        for(int i = 0; i < Machine.REGISTER_NUMBER; i++)
-        {
+        for (int i = 0; i < Machine.REGISTER_NUMBER; i++) {
             registers[i] = 0;
         }
     }
-
 }

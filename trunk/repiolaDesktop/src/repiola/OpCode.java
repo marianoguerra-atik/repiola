@@ -1,8 +1,3 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
-
 package repiola;
 
 /**
@@ -10,15 +5,16 @@ package repiola;
  * @author mariano
  */
 public class OpCode {
-    public OpCodeType type;
+
+    public int type;
     public String label;
     public int opcode;
 
-    public OpCode(OpCodeType type, int opcode) {
+    public OpCode(int type, int opcode) {
         this(type, opcode, null);
     }
 
-    public OpCode(OpCodeType type, int opcode, String label) {
+    public OpCode(int type, int opcode, String label) {
         this.type = type;
         this.opcode = opcode;
         this.label = label;
