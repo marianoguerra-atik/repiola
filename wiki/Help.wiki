@@ -65,6 +65,8 @@ The instructions are the following
  * ":": (colon) define a label at that point, labels allow to jump to that location with the jump instructions
   * {{{: foo # define a foo label}}}
  * jmp foo: inconditionally jump to foo, that means, when the instruction is reached execution continues where foo is defined
+ * jmp r#: jump to the address stored in r#
+  * {{{jmp r2 # jump to the address stored in r2}}}
  * eq: jump to a label if two values are equal
   * {{{eq r1 10 foo # jump to foo if r1 is equal to 10}}}
   * {{{eq r1 r2 foo # jump to foo if r1 is equal to r2}}}
@@ -91,6 +93,16 @@ The instructions are the following
   * {{{push r2 # push the value stored in the register 2 to the stack}}}
  * pop: pop the value stored at the top of the stack and store it in a register
   * {{{pop r2 # pop the value stored at the top of the stack and store it in the register 2}}}
+
+== Function instructions ==
+
+instructions to simulate functions
+
+ * call: push the instruction pointer in the stack and jmp to the specified label
+  * {{{call draw-line # push the instruction pointer in the stack and jump to the draw-line label}}}
+ * ret: pop the instruction pointer from the stack and jump to it
+  * {{{ret}}}
+
 
 == Special instructions ==
 
