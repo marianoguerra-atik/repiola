@@ -5,7 +5,7 @@
 
 package gui;
 import javax.microedition.lcdui.*;
-import repiola.Interpreter;
+import repiola.Compiler;
 import repiola.Machine;
 
 /**
@@ -17,7 +17,7 @@ public class MobileCanvas extends Canvas implements Drawable{
     private boolean changed;
     private String program;
     private Machine machine;
-    private Interpreter interpreter;
+    private Compiler compiler;
     private int rgbData[] = new int[1];
     private Graphics graphics;
 
@@ -129,61 +129,24 @@ public class MobileCanvas extends Canvas implements Drawable{
         this.serviceRepaints();
     }
 
-    public void setProgram(String program) {
+    public void setProgram(String program) throws Exception{
+        compiler = new Compiler();
+        int[] instructions;
+        boolean keepRunning = true;
         this.program = program;
-        String line = null;
-        int opcode;
-
-        try
-        {
-            interpreter = new Interpreter(program, machine);
-            line = interpreter.step();
-        }
-        catch(Exception ex)
-        {
-            System.err.println("\nError0 line: " + line + "\n\t" + ex.getMessage());
-            return;
-        }
 
         machine.clear();
         clear();
 
-        while(line != null)
-        {
-            opcode = interpreter.getCurrentOpcode();
 
-            try
-            {
-                if(opcode == -1) {
-                    opcode = interpreter.parseLine(line);
-                    interpreter.setCurrentOpcode(opcode);
-                }
-            }
-            catch(Exception ex)
-            {
-                System.err.println("\nError1 line: " + line + "\n\t" + ex.getMessage());
-                break;
-            }
+        instructions = compiler.compile(program);
 
-            try
-            {
-                machine.execute(opcode);
-            }
-            catch(Exception ex)
-            {
-                System.err.println("\nError executing code: " + line + "\n\t" + ex.getMessage());
-                break;
-            }
+        machine.clear();
 
-            try
-            {
-                line = interpreter.step();
-            }
-            catch(Exception ex)
-            {
-                System.err.println("\nError2 line: " + line + "\n\t" + ex.getMessage());
-                break;
-            }
+        while (keepRunning) {
+            keepRunning = machine.step(instructions);
         }
     }
+
+
 }
