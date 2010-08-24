@@ -56,24 +56,27 @@ public class Machine {
     public static final byte I_LE = 16;
     public static final byte I_RLE = 17;
     public static final byte I_JUMP = 106;
+    public static final byte I_RJUMP = 107;
     public static final byte I_NOP = 0;
     public static final byte I_CLR = 18;
     public static final byte I_RCLR = 19;
     public static final byte I_PUSH = 20;
     public static final byte I_RPUSH = 21;
     public static final byte I_RPOP = 22;
+    public static final byte I_CALL = 23;
+    public static final byte I_RET = 24;
 
 
     // instructions that contain register as second byte
     public static final int[] I_SOURCE_REGISTER = {I_RANDOM, I_GET, I_ADD, I_RADD, I_SUB, I_RSUB, I_MUL, I_RMUL, I_DIV, I_RDIV, I_MOD, I_RMOD, I_AND, I_RAND, I_OR, I_ROR, I_XOR, I_RXOR, I_NOT, I_SET, I_RSET, I_EQ, I_REQ, I_NE, I_RNE, I_GT, I_RGT, I_GE, I_RGE, I_LT, I_RLT, I_LE, I_RLE};
     // instructions that contain a pixel color xppx
-    public static final int[] I_PIXEL = {I_PUT, I_RPUT, I_CLR, I_RCLR, I_PUSH, I_RPUSH, I_RPOP};
+    public static final int[] I_PIXEL = {I_PUT, I_RPUT, I_CLR, I_RCLR, I_PUSH, I_RPUSH, I_RPOP, I_RJUMP};
     // instructions that contain a number xxnn
     public static final int[] I_NUMBER = {I_ADD, I_SUB, I_MUL, I_DIV, I_MOD, I_AND, I_OR, I_XOR, I_SET, I_EQ, I_NE, I_GT, I_GE, I_LT, I_LE};
     // instructions that contain a number xxnn
     public static final int[] I_DESTINATION_REGISTER = {I_RADD, I_RSUB, I_RMUL, I_RDIV, I_RMOD, I_RAND, I_ROR, I_RXOR, I_RSET, I_REQ, I_RNE, I_RGT, I_RGE, I_RLT, I_RLE};
     // instructions that are followed by a jump address
-    public static final int[] I_LABEL = {I_EQ, I_NE, I_GT, I_GE, I_LT, I_LE, I_JUMP};
+    public static final int[] I_LABEL = {I_EQ, I_NE, I_GT, I_GE, I_LT, I_LE, I_JUMP, I_CALL};
 
     private int instructionPointer;
     private boolean inJump;
@@ -150,6 +153,20 @@ public class Machine {
         this.jump = jump;
     }
 
+    public void run (int[] instructions) throws Exception {
+        int size = instructions.length;
+        this.instructionPointer = 0;
+        
+        while (this.instructionPointer < size) {
+            execute(instructions[instructionPointer]);
+        }
+    }
+
+    public boolean step (int[] instructions) throws Exception {
+        execute(instructions[instructionPointer]);
+        return instructionPointer < instructions.length;
+    }
+
     public void execute(int instruction) throws Exception
     {
         byte instr, register=0, dest_register=0;
@@ -193,7 +210,7 @@ public class Machine {
             {
                 pixel = (short)((instruction & MASK_PIXEL_COLOR) >> 8);
             }
-            else if(instr == I_RPUT || instr == I_RCLR || instr == I_RPUSH || instr == I_RPOP)
+            else if(instr == I_RPUT || instr == I_RCLR || instr == I_RPUSH || instr == I_RPOP || instr == I_RJUMP)
             {
                 register = (byte)((instruction & MASK_SOURCE_REGISTER) >> 16);
             }
@@ -247,6 +264,9 @@ public class Machine {
             case I_LE: setJump(registers[register] <= number);break;
             case I_RLE: setJump(registers[register] <= registers[dest_register]);break;
             case I_JUMP: setJump(true);break;
+            case I_RJUMP: instructionPointer = registers[register];return;
+            case I_CALL: push(instructionPointer + 2);setJump(true);break;
+            case I_RET: instructionPointer = pop();return;
             case I_CLR: clearScreen(pixel);break;
             case I_RCLR: clearScreen(registers[register]);break;
             case I_PUSH: push(pixel);break;
@@ -256,6 +276,8 @@ public class Machine {
 
             default: throw new Exception("Invalid instruction " + instr);
         }
+
+        instructionPointer++;
     }
 
     public boolean isSourceRegisterInstruction(int instruction)
@@ -334,6 +356,8 @@ public class Machine {
 
     public void clear()
     {
+        this.instructionPointer = 0;
+
         for(int i = 0; i < Machine.REGISTER_NUMBER; i++)
         {
             registers[i] = 0;

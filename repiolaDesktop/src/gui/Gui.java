@@ -11,7 +11,7 @@
 
 package gui;
 
-import repiola.Interpreter;
+import repiola.Compiler;
 import repiola.Machine;
 
 /**
@@ -105,62 +105,25 @@ public class Gui extends javax.swing.JFrame {
     }//GEN-LAST:event_formFocusGained
 
     private void runActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_runActionPerformed
-        Interpreter interpreter;
-        String line = null;
-        int opcode;
+        Compiler compiler = new Compiler();
+        int[] instructions;
+        boolean keepRunning = true;
         clearOutput();
         swingCanvas.clear();
 
-        try
-        {
-            interpreter = new Interpreter(code.getText(), machine);
-            line = interpreter.step();
+        try {
+            instructions = compiler.compile(code.getText());
+
+            machine.clear();
+
+            while(keepRunning) {
+                keepRunning = machine.step(instructions);
+            }
         }
-        catch(Exception ex)
-        {
-            appendOutput("\nError0 line: " + line + "\n\t" + ex.getMessage());
+        catch(Exception ex) {
+            appendOutput("\nError: " + ex.getMessage());
             return;
-        }
-
-        machine.clear();
-
-        while(line != null)
-        {
-            opcode = interpreter.getCurrentOpcode();
-            
-            try
-            {
-                if(opcode == -1) {
-                    opcode = interpreter.parseLine(line);
-                    interpreter.setCurrentOpcode(opcode);
-                }
-            }
-            catch(Exception ex)
-            {
-                appendOutput("\nError1 line: " + line + "\n\t" + ex.getMessage());
-                break;
-            }
-
-            try
-            {
-                machine.execute(opcode);
-            }
-            catch(Exception ex)
-            {
-                appendOutput("\nError executing code: " + line + "\n\t" + ex.getMessage());
-                break;
-            }
-            
-            try
-            {
-                line = interpreter.step();
-            }
-            catch(Exception ex)
-            {
-                appendOutput("\nError2 line: " + line + "\n\t" + ex.getMessage());
-                break;
-            }
-        }
+        }        
 }//GEN-LAST:event_runActionPerformed
 
     /**

@@ -238,8 +238,18 @@ public class Repiola extends MIDlet implements CommandListener {
         Storage.save("code", textBox.getString(), 1);
         getMobileCanvas().newImage(getDisplay().getCurrent().getWidth(), getDisplay().getCurrent().getWidth());
         getDisplay().setCurrent(getMobileCanvas());
-        getDisplay().callSerially(new Thread(){public void run(){getMobileCanvas().setProgram(textBox.getString());}});
+        getDisplay().callSerially(new Thread() {
+
+            public void run() {
+                try {
+                    getMobileCanvas().setProgram(textBox.getString());
+                } catch (Exception ex) {
+                    showException(ex);
+                }
+            }
+        });
     }
+
     /**
      * Called when MIDlet is paused.
      */
@@ -254,4 +264,9 @@ public class Repiola extends MIDlet implements CommandListener {
     public void destroyApp(boolean unconditional) {
     }
 
+    private void showException(Exception e) {
+        Alert a = new Alert("Exception", e.toString(), null, null);
+        a.setTimeout(Alert.FOREVER);
+        getDisplay().setCurrent(a, getMobileCanvas());
+    }
 }

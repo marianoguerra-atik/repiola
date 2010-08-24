@@ -4,133 +4,103 @@
  */
 
 package repiola;
+
 import java.util.Hashtable;
 import java.util.Vector;
+
 /**
  *
  * @author mariano
  */
-public class Interpreter {
-    private String[] lines;
-    // line: label
-    private Hashtable labels;
-    // line where a jump names a label: label
-    private Hashtable jumpLabels;
-    private Hashtable opcodes;
-    private int currentLine;
-    private Machine machine;
-    private boolean inJump;
-    private String lastLabel;
+public abstract class Parser {
+    protected Hashtable labels;
+    protected String[] lines;
+    protected boolean inJump;
+    protected String lastLabel;
 
-    private static final String[] commands =  {"put", "#", ":", "jmp",
-     "add", "sub", "mul", "div", "mod", "set", "or", "and", "xor", "not", "eq", "ne", "gt", "lt", "ge", "le", "get", ".", "rnd", "clr", "push", "pop"};
-    private static final String[] jumpCommands =  {"jmp", ":"};
-    private static final String[] singleCommands =  {"put", "get", "rnd", "not", "clr", "push", "pop"};
-    private static final String[] registerCommands =  {"add", "sub", "mul", "div", "mod", "set", "or", "and", "xor"};
-    private static final String[] compareCommands =  {"eq", "ne", "gt", "lt", "ge", "le"};
+    protected static final String[] commands =  {"put", "#", ":", "jmp",
+     "add", "sub", "mul", "div", "mod", "set", "or", "and", "xor", "not", "eq", "ne", "gt", "lt", "ge", "le", "get", ".", "rnd", "clr", "push", "pop", "call", "ret"};
+    protected static final String[] jumpCommands =  {"jmp", ":", "call", "ret"};
+    protected static final String[] singleCommands =  {"put", "get", "rnd", "not", "clr", "push", "pop"};
+    protected static final String[] registerCommands =  {"add", "sub", "mul", "div", "mod", "set", "or", "and", "xor"};
+    protected static final String[] compareCommands =  {"eq", "ne", "gt", "lt", "ge", "le"};
 
-    public Interpreter(String program, Machine machine){
-        lines = split(program, "\n");
-        labels = new Hashtable();
-        jumpLabels = new Hashtable();
-        opcodes = new Hashtable();
-        parseLabels();
-        this.machine = machine;
-    }
-
-    private void parseLabels()
-    {
-        String label, line;
-        for(int i = 0; i < lines.length; i++)
-        {
-            line = lines[i];
-
-            if(line.startsWith(":"))
-            {
-                label = line.substring(2);
-                labels.put(label, new Label(label, i + 1));
-            }
-        }
-    }
-
-    public String step() throws Exception
-    {
-        String line;
-        if(inJump)
-        {
-            if(machine.isJump())
-            {
-                jumpToLabel(lastLabel);
-                machine.setInJump(false);
-                machine.setJump(false);
-                inJump = false;
-                line = lines[currentLine];
-                currentLine++;
-                return line;
-            }
-            else {
-                machine.setInJump(false);
-                machine.setJump(false);
-                inJump = false;
-                line = lines[currentLine];
-                currentLine++;
-                return line;
-            }
-        }
-
-        if(currentLine < lines.length)
-        {
-            line = lines[currentLine];
-            currentLine++;
-            return line;
-        }
-
-        return null;
-    }
-
-
-    public int parseLine(String line) throws Exception
-    {
+    public OpCode parseLine(String line) throws Exception {
         String []tokens = split(line.trim(), " ");
-        int nop = (int)Machine.I_NOP << 24;
 
-        if(tokens.length == 0)
-        {
-            return nop;
+        if(tokens.length == 0) {
+            return null;
         }
 
         String command = tokens[0];
 
-        if(command.startsWith("#") || command.equals(".") || command.equals(""))
-        {
-            return nop;
+        if(command.startsWith("#") || command.equals(".") || command.equals("")) {
+            return null;
         }
 
-        if(!this.isStringInArrayBecauseJavaDoesNotHaveInLikePython(Interpreter.commands, command))
-        {
+        if(!this.isStringInArrayBecauseJavaDoesNotHaveInLikePython(commands, command)) {
             throw new Exception("Invalid command '" + command + "'");
         }
 
-        if(this.isStringInArrayBecauseJavaDoesNotHaveInLikePython(Interpreter.registerCommands, command))
-        {
+        if(this.isStringInArrayBecauseJavaDoesNotHaveInLikePython(registerCommands, command)) {
             return parseRegisterCommand(tokens);
         }
-        else if(this.isStringInArrayBecauseJavaDoesNotHaveInLikePython(Interpreter.compareCommands, command))
-        {
+        else if(this.isStringInArrayBecauseJavaDoesNotHaveInLikePython(compareCommands, command)) {
             return parseCompareCommand(tokens);
         }
-        else if(this.isStringInArrayBecauseJavaDoesNotHaveInLikePython(Interpreter.singleCommands, command))
-        {
+        else if(this.isStringInArrayBecauseJavaDoesNotHaveInLikePython(singleCommands, command)) {
             return parseSingleCommand(tokens);
         }
-        else if(this.isStringInArrayBecauseJavaDoesNotHaveInLikePython(Interpreter.jumpCommands, command))
-        {
+        else if(this.isStringInArrayBecauseJavaDoesNotHaveInLikePython(jumpCommands, command)) {
             return parseJumpCommand(tokens);
         }
-        else
-        {
+        else {
             throw new Exception("Invalid command " + command);
         }
+    }
+
+    protected OpCode parseJumpCommand(String[] tokens) throws Exception
+    {
+        String command, label = null;
+        OpCode opcode;
+        short registerNumber;
+
+        command = tokens[0].toLowerCase();
+
+        if(!command.equals("ret")) {
+            if(tokens.length != 2) {
+                throw new Exception("Invalid number of arguments for jump command " + tokens.toString());
+            }
+            
+            label = tokens[1].toLowerCase();
+        }
+
+
+        if(command.equals("jmp")) {
+            
+            registerNumber = getRegisterNumber(label);
+
+            if (isRegisterIdentifier(label) && registerNumber != -1) {
+                opcode = new OpCode(OpCodeType.Opcode, ((Machine.I_RJUMP << 24) | (registerNumber << 16)));
+            }
+            else {
+                opcode = new OpCode(OpCodeType.Jump, (Machine.I_JUMP << 24), label);
+            }
+        }
+        else if (command.equals("call")) {
+            opcode = new OpCode(OpCodeType.Jump, (Machine.I_CALL << 24), label);
+        }
+        else if (command.equals("ret")) {
+            opcode = new OpCode(OpCodeType.Opcode, (Machine.I_RET << 24));
+        }
+        else if(command.equals(":")) {
+            opcode = new OpCode(OpCodeType.Label, -1, label);
+        }
+        else {
+            throw new Exception("Invalid jmp/label command");
+        }
+
+        return opcode;
     }
 
     public boolean isStringInArrayBecauseJavaDoesNotHaveInLikePython(String[] array, String item)
@@ -148,33 +118,7 @@ public class Interpreter {
         return false;
     }
 
-    private int parseJumpCommand(String[] tokens) throws Exception
-    {
-        String command, label;
-
-        if(tokens.length != 2)
-        {
-            throw new Exception("Invalid number of arguments for jump command " + tokens.toString());
-        }
-
-        command = tokens[0].toLowerCase();
-        label = tokens[1].toLowerCase();
-
-        if(command.equals("jmp"))
-        {
-            addJumpLabel(label);
-            jumpToLabel(label);
-        }
-        else if(command.equals(":"))
-        {
-            addLabel(label);
-        }
-        else throw new Exception("Invalid compare command");
-
-        return (int)(Machine.I_NOP << 24);
-    }
-
-    private int parseSingleCommand(String[] tokens) throws Exception
+    protected OpCode parseSingleCommand(String[] tokens) throws Exception
     {
         String dest, command;
         short number=0;
@@ -212,10 +156,10 @@ public class Interpreter {
         else if(command.equals("pop") && !isNumber)instruction = buildSingleInstruction(isNumber, Machine.I_RPOP, (byte)0, register);
         else throw new Exception("Invalid single command");
 
-        return instruction;
+        return new OpCode(OpCodeType.Opcode, instruction);
     }
 
-    private int parseCompareCommand(String[] tokens) throws Exception
+    protected OpCode parseCompareCommand(String[] tokens) throws Exception
     {
         String dest, register, command, label;
         short number=0;
@@ -232,7 +176,7 @@ public class Interpreter {
         register = tokens[1].toLowerCase();
         dest = tokens[2].toLowerCase();
         label = tokens[3].toLowerCase();
-        addJumpLabel(label);
+        //addJumpLabel(label);
         sourceRegister = (byte)getNumber(register);
         if(isRegisterIdentifier(dest))
         {
@@ -252,12 +196,10 @@ public class Interpreter {
         else if(command.equals("le"))instruction = buildCompareInstruction(isNumber, Machine.I_LE, Machine.I_RLE, number, sourceRegister, destinationRegister);
         else throw new Exception("Invalid compare command");
 
-        inJump = true;
-        lastLabel = label;
-        return instruction;
+        return new OpCode(OpCodeType.Opcode, instruction, label);
     }
 
-    private int parseRegisterCommand(String[] tokens) throws Exception
+    protected OpCode parseRegisterCommand(String[] tokens) throws Exception
     {
         String dest, register, command;
         short number=0;
@@ -297,10 +239,10 @@ public class Interpreter {
         else if(command.equals("set"))instruction = buildRegisterInstruction(isNumber, Machine.I_SET, Machine.I_RSET, number, sourceRegister, destinationRegister);
         else throw new Exception("Invalid register command");
 
-        return instruction;
+        return new OpCode(OpCodeType.Opcode, instruction);
     }
 
-    private boolean isRegisterIdentifier(String identifier)
+    protected boolean isRegisterIdentifier(String identifier)
     {
         if(identifier.startsWith("r"))
         {
@@ -310,7 +252,18 @@ public class Interpreter {
         return false;
     }
 
-    private short getNumber(String number) throws Exception
+    protected short getRegisterNumber(String str) {
+        String register = str.substring(1);
+            
+        try {
+            return (short)Integer.parseInt(register);
+        }
+        catch(NumberFormatException ex) {
+            return -1;
+        }
+    }
+
+    protected short getNumber(String number) throws Exception
     {
         short value;
         int base;
@@ -320,49 +273,41 @@ public class Interpreter {
         if(number.startsWith("r"))
         {
             register = number.substring(1);
-            try
-            {
+
+            try {
                 value = (short)Integer.parseInt(register);
             }
-            catch(NumberFormatException ex)
-            {
+            catch(NumberFormatException ex) {
                 throw new Exception("Invalid register identifier " + register);
             }
 
-            if(value >= Machine.REGISTER_NUMBER)
-            {
+            if(value >= Machine.REGISTER_NUMBER) {
                 throw new Exception("Register max identifier exceeded" + register);
             }
 
             return value;
         }
-        else if(number.startsWith("0x"))
-        {
+        else if(number.startsWith("0x")) {
             base = 16;
             numberValue = number.substring(2);
         }
-        else if(number.startsWith("0b"))
-        {
+        else if(number.startsWith("0b")) {
             base = 2;
             numberValue = number.substring(2);
         }
-        else if(number.startsWith("0o"))
-        {
+        else if(number.startsWith("0o")) {
             base = 8;
             numberValue = number.substring(2);
         }
-        else
-        {
+        else {
             base = 10;
             numberValue = number;
         }
 
-        try
-        {
+        try {
             value = Short.parseShort(numberValue, base);
         }
-        catch(NumberFormatException ex)
-        {
+        catch(NumberFormatException ex) {
             throw new Exception("Invalid number format " + number);
         }
 
@@ -370,7 +315,7 @@ public class Interpreter {
         return value;
     }
 
-    private int buildCompareInstruction(boolean isNumber, byte instNumber, byte instRegister, short number, byte sourceRegister, byte destinationRegister)
+    protected int buildCompareInstruction(boolean isNumber, byte instNumber, byte instRegister, short number, byte sourceRegister, byte destinationRegister)
     {
         if(isNumber)
         {
@@ -384,7 +329,7 @@ public class Interpreter {
         }
     }
 
-    private int buildRegisterInstruction(boolean isNumber, byte instNumber, byte instRegister, short number, byte sourceRegister, byte destinationRegister)
+    protected int buildRegisterInstruction(boolean isNumber, byte instNumber, byte instRegister, short number, byte sourceRegister, byte destinationRegister)
     {
         if(isNumber)
         {
@@ -398,7 +343,7 @@ public class Interpreter {
         }
     }
 
-    private int buildSingleInstruction(boolean isNumber, byte instruction, short number, byte register)
+    protected int buildSingleInstruction(boolean isNumber, byte instruction, short number, byte register)
     {
         if(isNumber)
         {
@@ -413,42 +358,13 @@ public class Interpreter {
         }
     }
 
-    private void addLabel(String label) throws Exception
-    {
-        Label l;
-        if(labels.containsKey(label))
-        {
-            l = ((Label)labels.get(label));
-            if(l.getLine() != currentLine)
-            {
-                throw new Exception("Duplacated label " + label + " " + currentLine + " and " + l.getLine());
-            }
-        }
-        else
-        {
-            labels.put(label, new Label(label, currentLine));
-        }
-    }
-
-    private void jumpToLabel(String label) throws Exception
-    {
-        if(labels.containsKey(label))
-        {
-            currentLine = ((Label)labels.get(label)).getLine();
-        }
-        else
-        {
-            throw new Exception("Label not found" + label + "\n");
-        }
-    }
-
     /**
      * Split string into multiple strings
      * @param original      Original string
      * @param separator     Separator string in original string
      * @return              Splitted string array
      */
-    private String[] split(String original, String separator) {
+    protected String[] split(String original, String separator) {
         Vector nodes = new Vector();
 
         // Parse nodes into vector
@@ -468,42 +384,6 @@ public class Interpreter {
             result[loop] = (String)nodes.elementAt(loop);
         }
         return result;
-    }
-
-    public int getOpcode(int line) {
-        Integer iline = new Integer(line);
-        if(opcodes.containsKey(iline)) {
-            if(jumpLabels.containsKey(iline)) {
-                lastLabel = (String)jumpLabels.get(iline);
-                inJump = true;
-            }
-            return ((Integer)opcodes.get(iline)).intValue();
-        }
-
-        return  -1;
-    }
-
-    public int getCurrentOpcode() {
-        return getOpcode(getCurrentLine());
-    }
-
-    public void setOpcode(int line, int opcode) {
-        opcodes.put(new Integer(line), new Integer(opcode));
-    }
-
-    public void setCurrentOpcode(int opcode) {
-        opcodes.put(new Integer(getCurrentLine()), new Integer(opcode));
-    }
-
-    private void addJumpLabel(String label) {
-        Integer cl = new Integer(getCurrentLine());
-        if(!jumpLabels.containsKey(cl)) {
-            jumpLabels.put(cl, label);
-        }
-    }
-
-    public int getCurrentLine() {
-        return currentLine - 1;
     }
 
 }
