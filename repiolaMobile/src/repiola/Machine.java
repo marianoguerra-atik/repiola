@@ -73,7 +73,6 @@ public class Machine {
     // instructions that are followed by a jump address
     public static final int[] I_LABEL = {I_EQ, I_NE, I_GT, I_GE, I_LT, I_LE, I_JUMP, I_CALL};
     private int instructionPointer;
-    private boolean inJump;
     private boolean jump;
     private int[] registers;
     private Random generator;
@@ -123,14 +122,6 @@ public class Machine {
         this.screen.clear(color);
     }
 
-    public boolean isInJump() {
-        return inJump;
-    }
-
-    public void setInJump(boolean inJump) {
-        this.inJump = inJump;
-    }
-
     public int getInstructionPointer() {
         return instructionPointer;
     }
@@ -165,12 +156,9 @@ public class Machine {
         byte instr, register = 0, dest_register = 0;
         short pixel = 0, number = 0;
 
-        if (inJump) {
-            if (jump) {
-                instructionPointer = instruction;
-            }
-
-            inJump = false;
+        if (jump) {
+            instructionPointer = instruction;
+            jump = false;
             return;
         }
 
@@ -201,10 +189,6 @@ public class Machine {
 
         if (isNumberInstruction(instr)) {
             number = (short) (instruction & MASK_NUMBER);
-        }
-
-        if (isJumpInstruction(instr)) {
-            inJump = true;
         }
 
         switch (instr) {
