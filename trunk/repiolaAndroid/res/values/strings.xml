@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="hello">Hello World, RepiolaActivity!</string>
+    <string name="app_name">Repiola</string>
+<string name="run_label">Dale!</string>
+<string name="exit_label">Salir</string>
+<string name="test_value">set r0 100\nset r1 100\n: begin\neq r0 0 end\neq r1 0 end\neq r0 198 end\neq r1 198 end\nadd r3 2\nset r6 r3\nadd r4 1\nlt r4 4 next\nset r4 0\n: next\n: draw\nput r2\nadd r2 10\nsub r6 1\nne r4 0 check-1\nsub r1 1\njmp done\n: check-1\nne r4 1 check-2\nsub r0 1\njmp done\n: check-2\nne r4 2 check-3\nadd r1 1\njmp done\n: check-3\nadd r0 1\n: done\neq r6 0 begin\njmp draw\n: end</string>
+</resources>
