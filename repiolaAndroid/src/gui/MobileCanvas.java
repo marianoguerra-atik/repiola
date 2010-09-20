@@ -9,11 +9,11 @@ import repiola.Machine;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
-import android.graphics.Color;
 import android.graphics.Bitmap.Config;
 import android.util.AttributeSet;
+import android.view.Display;
 import android.view.View;
-import android.view.ViewGroup;
+import android.view.WindowManager;
 
 /**
  *
@@ -29,33 +29,33 @@ public class MobileCanvas extends View implements Drawable {
 	
     public MobileCanvas(Context context) {
     	super(context);
-        newImage(getWidth(), getHeight());
+    	Display display = ((WindowManager) context.getSystemService(Context.WINDOW_SERVICE)).getDefaultDisplay();
+    	setWidthAndHeight(display.getWidth(), display.getHeight());
+    	newImage(getWidth(), getHeight());
     	machine = new Machine(this);
     }
     
     public MobileCanvas(Context context, AttributeSet attr) {
     	super(context, attr);
-    	newImage(getWidth(), getHeight());
+    	Display display = ((WindowManager) context.getSystemService(Context.WINDOW_SERVICE)).getDefaultDisplay();
+    	setWidthAndHeight(display.getWidth(), display.getHeight());
+    	newImage(xWidth, yHeight);
     	machine = new Machine(this);
+    }
+    
+    public void setWidthAndHeight(int width, int height) {
+    	this.xWidth = width;
+    	this.yHeight = height;
     }
 
     public void newImage(int width, int height) {
-    	if(xWidth == yHeight && yHeight == 0) {
-    		xWidth = width;
-    		yHeight = height;
-    	}
-    	image = Bitmap.createBitmap(xWidth, yHeight, Config.RGB_565);
-    	for(int i = 0; i < xWidth; i++) {
-    		for(int j = 0; j < yHeight; j++) {
-    			image.setPixel(i, j, Color.MAGENTA);
-    		}
-    	}
+    	image = Bitmap.createBitmap(width, height, Config.RGB_565);
     }
 
 	@Override
 	protected void onDraw(Canvas canvas) {
-		canvas.setBitmap(image);
-		super.onDraw(canvas);
+		canvas.drawBitmap(image, 0, 0, null);
+		//super.onDraw(canvas);
 	}
 
     public int getPixel(int x, int y) {
@@ -104,8 +104,7 @@ public class MobileCanvas extends View implements Drawable {
     }
 
     public void clear() {
-    	ViewGroup layout = ((ViewGroup)this.getParent());
-    	newImage(layout.getWidth(), layout.getHeight());
+    	newImage(xWidth, yHeight);
     }
 
     public void setProgram(String program) {
